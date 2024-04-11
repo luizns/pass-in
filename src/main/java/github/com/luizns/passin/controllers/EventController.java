@@ -1,5 +1,7 @@
 package github.com.luizns.passin.controllers;
 
+import github.com.luizns.passin.dto.attendee.AttendeeIdDTO;
+import github.com.luizns.passin.dto.attendee.AttendeeRequestDTO;
 import github.com.luizns.passin.dto.attendee.AttendeesListResponseDTO;
 import github.com.luizns.passin.dto.event.EventIdDTO;
 import github.com.luizns.passin.dto.event.EventRequestDTO;
@@ -26,10 +28,17 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<EventIdDTO> createEvent(@RequestBody EventRequestDTO body, UriComponentsBuilder uriComponentsBuilder){
+    public ResponseEntity<EventIdDTO> createEvent(@RequestBody EventRequestDTO body, UriComponentsBuilder uriComponentsBuilder) {
         EventIdDTO eventIdDTO = this.eventService.createEvent(body);
         var uri = uriComponentsBuilder.path("/events/{id}").buildAndExpand(eventIdDTO.eventId()).toUri();
         return ResponseEntity.created(uri).body(eventIdDTO);
+    }
+
+    @PostMapping("{eventId}/attendees")
+    public ResponseEntity<AttendeeIdDTO> registerParticipant(@PathVariable String eventId, @RequestBody AttendeeRequestDTO body, UriComponentsBuilder uriComponentsBuilder) {
+        AttendeeIdDTO attendeeIdDTO = this.eventService.registerAttendeeOnEvent(eventId, body);
+        var uri = uriComponentsBuilder.path("/attendees/{attendeeId}/badge").buildAndExpand(attendeeIdDTO.attendeeId()).toUri();
+        return ResponseEntity.created(uri).body(attendeeIdDTO);
     }
 
     @GetMapping("/attendees/{id}")

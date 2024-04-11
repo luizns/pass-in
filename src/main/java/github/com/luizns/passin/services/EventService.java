@@ -20,7 +20,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EventService {
-
     private final EventRepository eventRepository;
     private final AttendeeService attendeeService;
 
@@ -42,7 +41,8 @@ public class EventService {
     }
 
     public AttendeeIdDTO registerAttendeeOnEvent(String eventId, AttendeeRequestDTO attendeeRequestDTO) {
-        this.attendeeService.verifyAttendeeSubscritption(attendeeRequestDTO.email(), eventId);
+        this.attendeeService.verifyAttendeeSubscription(attendeeRequestDTO.email(), eventId);
+
         Event event = this.getEventById(eventId);
         List<Attendee> attendeeList = this.attendeeService.getAllAttendeesFromEvent(eventId);
         if (event.getMaximumAttendees() <= attendeeList.size()) throw new EventFullException("Event is full");
@@ -56,19 +56,15 @@ public class EventService {
         return new AttendeeIdDTO(newAttendee.getId());
 
     }
-
     private Event getEventById(String eventId) {
-        return this.eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not found with ID:" + eventId));
-
+        return this.eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException("Event not fount with ID:" + eventId));
     }
 
     private String createSlug(String text) {
         String normalized = Normalizer.normalize(text, Normalizer.Form.NFD);
-        return normalized
-                .replaceAll("[\\p{InCOMBINING_DIACRITICAL_MARKS}]", "")
+        return normalized.replaceAll("[\\p{InCOMBINING_DIACRITICAL_MARKS}]", "")
                 .replaceAll("[^\\w\\s]", "")
                 .replaceAll("\\s+", "-")
                 .toLowerCase();
     }
-
 }
